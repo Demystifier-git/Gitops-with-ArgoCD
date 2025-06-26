@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flyway-sql-config
+  namespace: default
+  labels:
+    app: flyway
+data:
+  V1__init_social10.sql: |
+    -- CREATE DATABASE IF NOT EXISTS social10;
+    USE social10;
+
+    -- users table
+    CREATE TABLE IF NOT EXISTS users_social10 (
+      id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+      username VARCHAR(255) NOT NULL,
+      password VARCHAR(255) NOT NULL,
+      account_date DATETIME NOT NULL,
+      UNIQUE (username),
+      CHECK (username != "" AND password != "")
+    );
+
+    -- posts table
+    CREATE TABLE IF NOT EXISTS posts_social10 (
+      id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+      author_id INT NOT NULL,
+      content VARCHAR(255) NOT NULL,
+      post_date DATETIME NOT NULL,
+      FOREIGN KEY (author_id) REFERENCES users_social10 (id),
+      CHECK (content != "")
+    );
+
+    -- comments table
+    CREATE TABLE IF NOT EXISTS comments_social10 (
+      id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+      commenter_id INT NOT NULL,
+      post_id INT NOT NULL,
+      comment VARCHAR(255) NOT NULL,
+      comment_date DATETIME NOT NULL,
+      FOREIGN KEY (commenter_id) REFERENCES users_social10 (id),
+      FOREIGN KEY (post_id) REFERENCES posts_social10 (id),
+      CHECK (comment != "")
+    );
+
+    -- likes table
+    CREATE TABLE IF NOT EXISTS likes_social10 (
+      id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+      liker_id INT NOT NULL,
+      post_id INT NOT NULL,
+      FOREIGN KEY (liker_id) REFERENCES users_social10 (id),
+      FOREIGN KEY (post_id) REFERENCES posts_social10 (id)
+    );
+
+    -- Create monitoring user for Datadog
+    CREATE USER IF NOT EXISTS 'datadog'@'%' IDENTIFIED BY 'your_password';
+    GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'datadog'@'%';
+    FLUSH PRIVILEGES;
+
+
+

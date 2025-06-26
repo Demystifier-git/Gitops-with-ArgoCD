@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: flyway-migration
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: flyway
+    spec:
+      containers:
+        - name: flyway
+          image: flyway/flyway:9
+          args:
+            - -url=jdbc:mysql://mysql:3306/social10?allowPublicKeyRetrieval=true&useSSL=false
+            - -user=$(FLYWAY_USER)
+            - -password=$(FLYWAY_PASSWORD)
+            - -createSchemas=true
+            - repair
+            - migrate
+          env:
+            - name: FLYWAY_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysqldb-secret
+                  key: FLYWAY_USER
+            - name: FLYWAY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysqldb-secret
+                  key: FLYWAY_PASSWORD
+          volumeMounts:
+            - name: migration-scripts
+              mountPath: /flyway/sql
+      restartPolicy: OnFailure
+      volumes:
+        - name: migration-scripts
+          configMap:
+            name: flyway-sql-config

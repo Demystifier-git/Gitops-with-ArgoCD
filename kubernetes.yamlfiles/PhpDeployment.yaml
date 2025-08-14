@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: php-app
-          image: demystifier803/social12-php:latest
+          image: demystifier803/social10-php:latest
           ports:
             - containerPort: 80
           env:

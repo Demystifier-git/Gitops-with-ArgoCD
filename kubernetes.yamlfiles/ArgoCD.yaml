@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: my-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Demystifier-git/Gitops-with-ArgoCD.git
+    targetRevision: main    # Change if your branch is different
+    path: kubernetes.yamlfiles                 # Path inside the repo containing the manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default       # Namespace where app will be deployed
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
